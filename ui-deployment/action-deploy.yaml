@@ -1,0 +1,40 @@
+name: Kubernetes Deploy
+
+on:
+  push:
+    branches:
+      - dev
+  
+jobs:
+  deploy:
+    runs-on: "self-hosted"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # test micro status
+      - name: Test Minikube Status commands
+        id: minikube
+        run: |
+          set -ex
+          echo "Executing minikube status command."
+          minikube status
+
+      # login to docker
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      # build from the dockerfile in the default directory and push to docker hub 
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: fusesl/propati-ui:latest
+      
+      # Run the kustomize file to create/update the deployments/services
+      - name: Run the kustomize files
+        run: kubectl apply -k k8s/overlays/dev
