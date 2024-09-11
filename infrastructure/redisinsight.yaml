@@ -1,18 +1,3 @@
-# Redis Insight service with name 'redisinsight-service'
-apiVersion: v1
-kind: Service
-metadata:
-  name: redisinsight-service
-  namespace: redis-dev
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 80
-      targetPort: 5540
-  selector:
-    app: redisinsight
----
-# Redis Insight deployment with name 'redisinsight'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,7 +25,19 @@ spec:
               mountPath: /data
           ports:
             - containerPort: 5540 #exposed container port and protocol
-              protocol: TCP
       volumes:
         - name: redisinsight
-          emptyDir: {} # node-ephemeral volume https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+          emptyDir: {} # node-ephemeral volume https://kubernetes.io/docs/conce
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redisinsight
+  namespace: redis-dev
+spec:
+  selector:
+    app: redisinsight
+  ports:
+    - protocol: TCP
+      port: 5540
+      targetPort: 5540
