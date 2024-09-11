@@ -11,6 +11,7 @@ metadata:
   name: my-redis-config
   namespace: redis-dev
 data:
+  REDIS_URL: redis-dev.redis.svc.cluster.local:6379
   maxmemory : 2mb
 ---
 apiVersion: v1
@@ -20,6 +21,7 @@ metadata:
   namespace: redis-dev
 type: Opaque
 stringData:
+  REDIS_API_KEY: admin
   REDIS_PASSWORD: admin
 ---
 apiVersion: apps/v1
@@ -48,6 +50,18 @@ spec:
             requests:
               cpu: "1m"
           env:
+            - name: REDIS_URL # REDIS_URL is the hostname for the redis cluster
+              valueFrom:
+                configMapKeyRef:
+                  name: my-redis-config # name of the config-map
+                  key: REDIS_URL # import the value of 'redis-service' from app-configmap
+
+            - name: REDIS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret # name of the secret
+                  key: REDIS_API_KEY # import the value of 'apikey' from app-secret
+
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
