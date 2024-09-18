@@ -14,7 +14,7 @@ metadata:
     app: postgres
 type: Opaque
 stringData:
-  POSTGRES_DB: domain
+  POSTGRES_DB: propati
   POSTGRES_USER: admin
 ---
 apiVersion: v1
@@ -93,9 +93,9 @@ spec:
                   key: POSTGRES_PASSWORD
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
-              name: domain
+              name: propati
       volumes:
-        - name: domain
+        - name: propati
           persistentVolumeClaim:
             claimName: postgres-pv-claim
 ---
