@@ -26,36 +26,31 @@ stringData:
   POSTGRES_PASSWORD: 'admin'
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/volumes/pgsql"
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-pv-claim
+  name: postgres-pvc
   namespace: postgres-dev
-  labels:
-    app: postgres
 spec:
-  storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 30Gi
----
-kind: PersistentVolume
-apiVersion: v1
-metadata:
-  name: postgres-pv-volume
-  namespace: postgres-dev
-  labels:
-    type: local
-    app: postgres
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 30Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data"
+      storage: 20Gi
+  storageClassName: ""
+  volumeName: postgres-pv
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -76,27 +71,31 @@ spec:
       containers:
         - name: postgres
           image: postgres:15
-          imagePullPolicy: "IfNotPresent"
-#          command: ["sleep"]
-#          args: ["1000"]
-          ports:
-            - containerPort: 5432
-          envFrom:
-            - configMapRef:
-                name: postgres-config
           env:
+            - name: POSTGRES_USER
+              value: postgres
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRES_PASSWORD
+                  key: password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: propati
-      volumes:
-        - name: propati
-          persistentVolumeClaim:
-            claimName: postgres-pv-claim
+            - name: postgres-pv-claim
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-pv-claim
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
 ---
 apiVersion: v1
 kind: Service
