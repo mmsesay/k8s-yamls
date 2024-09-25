@@ -68,6 +68,13 @@ spec:
       labels:
         app: postgres
     spec:
+      initContainers:
+        - name: volume-permissions
+          image: busybox
+          command: [ "sh", "-c", "chown -R 10001:0 /var/lib/postgresql" ]
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql"
+              name: postgres-pv-claim
       containers:
         - name: postgres
           image: postgres:15
