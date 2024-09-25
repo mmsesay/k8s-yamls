@@ -33,7 +33,7 @@ spec:
   capacity:
     storage: 20Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: "/mnt/volumes/pgsql"
@@ -45,7 +45,7 @@ metadata:
   namespace: postgres-dev
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 20Gi
@@ -59,7 +59,7 @@ metadata:
   namespace: postgres-dev
 spec:
   serviceName: postgres
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: postgres
@@ -99,7 +99,7 @@ spec:
         name: postgres-pv-claim
       spec:
         accessModes:
-          - ReadWriteOnce
+          - ReadWriteMany
         resources:
           requests:
             storage: 20Gi
