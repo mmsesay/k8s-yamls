@@ -13,54 +13,31 @@ spec:
       labels:
         app: postgres
     spec:
+      initContainers:
+        - name: volume-permissions
+          image: busybox
+          command: [ "sh", "-c", "chown -R 10001:0 /var/lib/postgresql" ]
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql"
+              name: postgres-data
       containers:
         - name: postgres
           image: postgres:15
-          ports:
-            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: app-config
+
           env:
-            - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: POSTGRES_DB
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: app-secret
-                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: app-secret
                   key: POSTGRES_PASSWORD
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
-          livenessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - $(POSTGRES_DB)
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - $(POSTGRES_DB)
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
@@ -69,7 +46,7 @@ spec:
         name: postgres-data
       spec:
         accessModes:
-          - ReadWriteOnce
+          - ReadWriteMany
         resources:
           requests:
             storage: 10Gi
