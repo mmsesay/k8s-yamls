@@ -11,7 +11,7 @@ data:
           "Group": "Pgadmin - DEV",
           "Port": 5432,
           "Username": "devuser",
-          "Host": "postgres",
+          "Host": "postgres.dev",
           "SSLMode": "prefer",
           "MaintenanceDB": "dev_db",
           "Comment": "Development PostgreSQL"

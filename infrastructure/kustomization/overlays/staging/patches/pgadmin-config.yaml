@@ -11,7 +11,7 @@ data:
           "Group": "Pgadmin - STAGING",
           "Port": 5432,
           "Username": "staginguser",
-          "Host": "postgres",
+          "Host": "postgres.staging",
           "SSLMode": "prefer",
           "MaintenanceDB": "staging_db",
           "Comment": "Staging PostgreSQL Database"
