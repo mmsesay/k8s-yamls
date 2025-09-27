@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-config
+data:
+  servers.json: |
+    {
+      "Servers": {
+        "1": {
+          "Name": "PostgreSQL - Staging",
+          "Group": "Pgadmin - STAGING",
+          "Port": 5432,
+          "Username": "staginguser",
+          "Host": "postgres",
+          "SSLMode": "prefer",
+          "MaintenanceDB": "staging_db",
+          "Comment": "Staging PostgreSQL Database"
+        }
+      }
+    }

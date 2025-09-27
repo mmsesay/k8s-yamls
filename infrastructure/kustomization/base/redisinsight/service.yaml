@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redisinsight
+  labels:
+    app: redisinsight
+    component: cache-admin
+spec:
+  type: ClusterIP
+  selector:
+    app: redisinsight
+  ports:
+    - name: http
+      port: 5540
+      targetPort: 5540
+      protocol: TCP

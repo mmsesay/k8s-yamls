@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: propati-api
+  namespace: propati
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: propati-api
+  template:
+    metadata:
+      labels:
+        app: propati-api
+    spec:
+      containers:
+        - name: propati-api
+          image: fusesl/propati-api:latest
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP

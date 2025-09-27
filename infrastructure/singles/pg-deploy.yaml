@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: postgres-dev
+  labels:
+    name: postgres
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: postgres-dev
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: 'gsim'
+  POSTGRES_USER: 'postgres'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: postgres-dev
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: 'admin'
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/volumes/pgsql"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: postgres-dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: ""
+  volumeName: postgres-pv
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: postgres-dev
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      initContainers:
+        - name: volume-permissions
+          image: busybox
+          command: [ "sh", "-c", "chown -R 10001:0 /var/lib/postgresql" ]
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql"
+              name: postgres-pv-claim
+      containers:
+        - name: postgres
+          image: postgres:15
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: postgres-pv-claim
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-pv-claim
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: postgres-dev
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  clusterIP: None

@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: propati-api-ingress
+  namespace: propati
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+    - host: api.propati.xyz
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: propati-api-service
+                port:
+                  number: 8081

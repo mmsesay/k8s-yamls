@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-config
+data:
+  servers.json: |
+    {
+      "Servers": {
+        "1": {
+          "Name": "PostgreSQL - Production",
+          "Group": "Pgadmin - PRODUCTION",
+          "Port": 5432,
+          "Username": "produser",
+          "Host": "postgres",
+          "SSLMode": "require",
+          "MaintenanceDB": "prod_db",
+          "Comment": "Production PostgreSQL Database"
+        }
+      }
+    }

@@ -1,0 +1,104 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin-secret
+  namespace: postgres-dev
+type: Opaque
+stringData:
+  PGADMIN_DEFAULT_EMAIL: admin@example.com
+  PGADMIN_DEFAULT_PASSWORD: admin
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-config
+  namespace: postgres-dev
+data:
+  servers.json: |
+    {
+        "Servers": {
+          "1": {
+            "Name": "PostgreSQL DB",
+            "Group": "Servers",
+            "Port": 5432,
+            "Username": "postgres",
+            "Host": "postgres.postgres-dev",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres"
+          }
+        }
+    }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pgadmin
+  namespace: postgres-dev
+spec:
+  serviceName: pgadmin
+  podManagementPolicy: Parallel
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4
+          imagePullPolicy: Always
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: PGADMIN_DEFAULT_EMAIL
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: PGADMIN_DEFAULT_PASSWORD
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: pgadmin-config
+              mountPath: /pgadmin4/servers.json
+              subPath: servers.json
+              readOnly: true
+            - name: pgadmin-data
+              mountPath: /var/lib/pgadmin
+      volumes:
+        - name: pgadmin-config
+          configMap:
+            name: pgadmin-config
+  volumeClaimTemplates:
+    - metadata:
+        name: pgadmin-data
+        namespace: postgres-dev
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 3Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  namespace: postgres-dev
+spec:
+  selector:
+    app: pgadmin
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

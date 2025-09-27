@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: propati
+resources:
+  - service.yaml
+  - deployment.yaml
+  - ingress.yaml
+
+commonLabels:
+  app: propati-ui
+
+commonAnnotations:
+  app: propati-ui
+
+namePrefix: 
+  fusesl-
+
+nameSuffix: 
+  -v1

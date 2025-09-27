@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redisinsight
+  labels:
+    app: redisinsight
+    component: cache-admin
+spec:
+  serviceName: redisinsight
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redisinsight
+  template:
+    metadata:
+      labels:
+        app: redisinsight
+        component: cache-admin
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: redisinsight
+          image: redis/redisinsight:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REDISINSIGHT_HOST
+              value: "0.0.0.0"
+            - name: REDISINSIGHT_PORT
+              value: "5540"
+          ports:
+            - name: http
+              containerPort: 5540
+              protocol: TCP
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5540
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5540
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: redisinsight-data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redisinsight-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

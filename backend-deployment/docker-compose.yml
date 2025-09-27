@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
+      # Important to bind/mount your codebase dir to /app dir for live reload
+    volumes:
+      - ./:/app # .:/usr/src/app
+    command: air
+

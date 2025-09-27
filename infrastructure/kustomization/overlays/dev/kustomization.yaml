@@ -1,0 +1,27 @@
+namespace: dev
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: app-config
+    literals:
+      - POSTGRES_DB=dev_db
+      - REDIS_DB=0
+
+secretGenerator:
+  - name: app-secret
+    literals:
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=devpass 
+      - PGADMIN_DEFAULT_EMAIL=admin@dev.local
+      - PGADMIN_DEFAULT_PASSWORD=DevPassword123!
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+
+patches:
+  - path: patches/postgres-replicas.yaml
+  - path: patches/redis-replicas.yaml
+  - path: patches/minio-replicas.yaml
+  - path: patches/pgadmin-config.yaml
+  - path: patches/redisinsight-config.yaml
+

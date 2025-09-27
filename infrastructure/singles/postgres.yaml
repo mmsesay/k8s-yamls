@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: postgres-dev
+  labels:
+    name: postgres
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: postgres-dev
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: 'propati'
+  POSTGRES_USER: 'postgres'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: postgres-dev
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: 'admin'
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pv-claim
+  namespace: postgres-dev
+  labels:
+    app: postgres
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgres-pv-volume
+  namespace: postgres-dev
+  labels:
+    type: local
+    app: postgres
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: postgres-dev
+spec:
+  serviceName: postgres
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          imagePullPolicy: "IfNotPresent"
+#          command: ["sleep"]
+#          args: ["1000"]
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: propati
+      volumes:
+        - name: propati
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: postgres-dev
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

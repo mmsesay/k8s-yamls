@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: redis-dev # Change this value if you want a different namespace name
+  labels:
+    name: redis-dev # Change this value to match metadata.name
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-redis-config
+  namespace: redis-dev
+data:
+  REDIS_URL: redis-dev.redis.svc.cluster.local:6379
+  maxmemory : 2mb
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: redis-dev
+type: Opaque
+stringData:
+  REDIS_API_KEY: admin
+  REDIS_PASSWORD: admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-dev
+  namespace: redis-dev
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis-container
+          image: redis:alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: "1m"
+          env:
+            - name: REDIS_URL # REDIS_URL is the hostname for the redis cluster
+              valueFrom:
+                configMapKeyRef:
+                  name: my-redis-config # name of the config-map
+                  key: REDIS_URL # import the value of 'redis-service' from app-configmap
+
+            - name: REDIS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret # name of the secret
+                  key: REDIS_API_KEY # import the value of 'apikey' from app-secret
+
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /redis-master-data
+            - name: redis-config
+              mountPath: /redis-master
+      volumes:
+        - name: redis-config
+          configMap:
+            name: my-redis-config
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-dev
+  namespace: redis-dev
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

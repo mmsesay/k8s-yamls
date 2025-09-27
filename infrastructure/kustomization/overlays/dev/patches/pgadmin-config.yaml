@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-config
+data:
+  servers.json: |
+    {
+      "Servers": {
+        "1": {
+          "Name": "PostgreSQL - Development",
+          "Group": "Pgadmin - DEV",
+          "Port": 5432,
+          "Username": "devuser",
+          "Host": "postgres",
+          "SSLMode": "prefer",
+          "MaintenanceDB": "dev_db",
+          "Comment": "Development PostgreSQL"
+        }
+      }
+    }

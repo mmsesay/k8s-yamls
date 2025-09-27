@@ -1,0 +1,16 @@
+resources:
+  - postgres/deployment.yaml
+  - postgres/service.yaml
+  - redis/deployment.yaml
+  - redis/service.yaml
+  - minio/deployment.yaml
+  - minio/service.yaml
+  - minio/pv.yaml
+  - pgadmin/secret.yaml
+  - pgadmin/configmap.yaml
+  - pgadmin/deployment.yaml
+  - pgadmin/service.yaml
+  - redisinsight/configmap.yaml
+  - redisinsight/deployment.yaml
+  - redisinsight/service.yaml
+  - namespace.yaml
