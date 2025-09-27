@@ -19,8 +19,9 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: pgadmin
-          image: dpage/pgadmin4
-          imagePullPolicy: Always
+          # Use specific stable version for production stability
+          image: dpage/pgadmin4:8.5
+          imagePullPolicy: IfNotPresent
           env:
             - name: PGADMIN_DEFAULT_EMAIL
               valueFrom:
@@ -32,17 +33,78 @@ spec:
                 secretKeyRef:
                   name: pgadmin-secret
                   key: PGADMIN_DEFAULT_PASSWORD
+            # Disable email system to prevent postfix warnings
+            - name: PGADMIN_CONFIG_EMAIL_SERVER_ENABLED
+              value: "False"
+            - name: PGADMIN_CONFIG_MAIL_SERVER
+              value: ""
+            - name: PGADMIN_CONFIG_MAIL_PORT
+              value: "0"
+            # Disable server mode and master password requirement
+            - name: PGADMIN_CONFIG_SERVER_MODE
+              value: "False"
+            - name: PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED
+              value: "False"
+            # Additional stability settings
+            - name: PGADMIN_CONFIG_WTF_CSRF_ENABLED
+              value: "True"
+            - name: PGADMIN_CONFIG_SECURITY_PASSWORD_SALT
+              value: "pgadmin-salt-key"
+            - name: PGADMIN_CONFIG_SECRET_KEY
+              value: "pgadmin-secret-key"
+            # Disable auto-discovery to prevent startup issues
+            - name: PGADMIN_CONFIG_AUTO_DISCOVERY_ENABLED
+              value: "False"
+            # Suppress Python warnings
+            - name: PYTHONWARNINGS
+              value: "ignore::DeprecationWarning"
           ports:
             - name: http
               containerPort: 80
               protocol: TCP
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /misc/ping
+              port: 80
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /misc/ping
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
           volumeMounts:
             - name: pgadmin-config
               mountPath: /pgadmin4/servers.json
               subPath: servers.json
               readOnly: true
+            - name: pgadmin-config
+              mountPath: /pgadmin4/config_local.py
+              subPath: config_local.py
+              readOnly: true
             - name: pgadmin-data
               mountPath: /var/lib/pgadmin
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 5050
+            runAsGroup: 5050
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
       volumes:
         - name: pgadmin-config
           configMap:
