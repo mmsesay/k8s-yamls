@@ -9,7 +9,7 @@ data:
         {
           "id": "dev-redis",
           "name": "Nexlura Redis - Development",
-          "host": "redis",
+          "host": "redis.dev",
           "port": 6379,
           "db": 0,
           "description": "Development Redis Cache for Nexlura System - DEV"

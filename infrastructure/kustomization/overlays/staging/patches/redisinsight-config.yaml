@@ -9,7 +9,7 @@ data:
         {
           "id": "staging-redis",
           "name": "Nexlura Redis - Staging",
-          "host": "redis",
+          "host": "redis.staging",
           "port": 6379,
           "db": 0,
           "description": "Staging Redis Cache for Nexlura System - STAGING"
