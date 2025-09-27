@@ -58,6 +58,13 @@ spec:
             # Suppress Python warnings
             - name: PYTHONWARNINGS
               value: "ignore::DeprecationWarning"
+            # Additional configuration for stability
+            - name: PGADMIN_CONFIG_SESSION_COOKIE_SECURE
+              value: "False"
+            - name: PGADMIN_CONFIG_SESSION_COOKIE_HTTPONLY
+              value: "True"
+            - name: PGADMIN_CONFIG_SESSION_COOKIE_SAMESITE
+              value: "Lax"
           ports:
             - name: http
               containerPort: 80
@@ -89,10 +96,6 @@ spec:
             - name: pgadmin-config
               mountPath: /pgadmin4/servers.json
               subPath: servers.json
-              readOnly: true
-            - name: pgadmin-config
-              mountPath: /pgadmin4/config_local.py
-              subPath: config_local.py
               readOnly: true
             - name: pgadmin-data
               mountPath: /var/lib/pgadmin

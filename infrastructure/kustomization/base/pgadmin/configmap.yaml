@@ -18,32 +18,3 @@ data:
         }
       }
     }
-  config_local.py: |
-    # Suppress warnings and configure pgAdmin for stability
-    import warnings
-    import logging
-    
-    # Suppress pkg_resources deprecation warnings
-    warnings.filterwarnings('ignore', category=DeprecationWarning, module='pkg_resources')
-    
-    # Configure logging to reduce noise
-    logging.getLogger('werkzeug').setLevel(logging.WARNING)
-    
-    # Disable email functionality to prevent postfix issues
-    MAIL_SERVER = None
-    MAIL_PORT = None
-    MAIL_USE_SSL = False
-    MAIL_USE_TLS = False
-    MAIL_USERNAME = None
-    MAIL_PASSWORD = None
-    
-    # Additional stability settings
-    WTF_CSRF_ENABLED = True
-    SECURITY_PASSWORD_SALT = 'pgadmin-salt-key'
-    SECRET_KEY = 'pgadmin-secret-key'
-    
-    # Disable auto-discovery
-    AUTO_DISCOVERY_ENABLED = False
-    
-    # Disable email server completely
-    EMAIL_SERVER_ENABLED = False
