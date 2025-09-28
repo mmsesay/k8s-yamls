@@ -38,6 +38,9 @@ spec:
             # Simple email disable to prevent postfix warnings
             - name: PGADMIN_CONFIG_EMAIL_SERVER_ENABLED
               value: "False"
+            # Suppress Python deprecation warnings
+            - name: PYTHONWARNINGS
+              value: "ignore::DeprecationWarning"
           ports:
             - name: http
               containerPort: 80
