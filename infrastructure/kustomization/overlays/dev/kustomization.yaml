@@ -13,7 +13,7 @@ secretGenerator:
     literals:
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=devpass 
-      - PGADMIN_DEFAULT_EMAIL=admin@dev.local
+      - PGADMIN_DEFAULT_EMAIL=admin@dev.com
       - PGADMIN_DEFAULT_PASSWORD=DevPassword123!
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin

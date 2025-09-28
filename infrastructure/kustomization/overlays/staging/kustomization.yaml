@@ -13,7 +13,7 @@ secretGenerator:
     literals:
       - POSTGRES_USER=staginguser
       - POSTGRES_PASSWORD=stagingpass
-      - PGADMIN_DEFAULT_EMAIL=admin@staging.local
+      - PGADMIN_DEFAULT_EMAIL=admin@staging.com
       - PGADMIN_DEFAULT_PASSWORD=StagingPassword123!
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
