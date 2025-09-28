@@ -13,8 +13,8 @@ secretGenerator:
     literals:
       - POSTGRES_USER=produser
       - POSTGRES_PASSWORD=prodpass
-      - PGADMIN_DEFAULT_EMAIL=admin@yourdomain.com
-      - PGADMIN_DEFAULT_PASSWORD=CHANGE_THIS_TO_SECURE_PASSWORD_IN_PRODUCTION
+      - PGADMIN_DEFAULT_EMAIL=admin@production.com
+      - PGADMIN_DEFAULT_PASSWORD=ProductionPassword123!
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
 

@@ -28,12 +28,12 @@ spec:
             - name: PGADMIN_DEFAULT_EMAIL
               valueFrom:
                 secretKeyRef:
-                  name: pgadmin-secret
+                  name: app-secret
                   key: PGADMIN_DEFAULT_EMAIL
             - name: PGADMIN_DEFAULT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: pgadmin-secret
+                  name: app-secret
                   key: PGADMIN_DEFAULT_PASSWORD
             # Simple email disable to prevent postfix warnings
             - name: PGADMIN_CONFIG_EMAIL_SERVER_ENABLED

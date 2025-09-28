@@ -6,7 +6,6 @@ resources:
   - minio/deployment.yaml
   - minio/service.yaml
   - minio/pv.yaml
-  - pgadmin/secret.yaml
   - pgadmin/configmap.yaml
   - pgadmin/deployment.yaml
   - pgadmin/service.yaml
