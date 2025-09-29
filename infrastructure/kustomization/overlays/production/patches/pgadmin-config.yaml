@@ -11,7 +11,7 @@ data:
           "Group": "Pgadmin - PRODUCTION",
           "Port": 5432,
           "Username": "produser",
-          "Host": "postgres.production",
+          "Host": "postgres",
           "SSLMode": "require",
           "MaintenanceDB": "prod_db",
           "Comment": "Production PostgreSQL Database"

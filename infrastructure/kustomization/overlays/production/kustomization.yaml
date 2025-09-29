@@ -5,13 +5,13 @@ resources:
 configMapGenerator:
   - name: app-config
     literals:
+      - POSTGRES_USER=produser
       - POSTGRES_DB=prod_db
       - REDIS_DB=0
 
 secretGenerator:
   - name: app-secret
     literals:
-      - POSTGRES_USER=produser
       - POSTGRES_PASSWORD=prodpass
       - PGADMIN_DEFAULT_EMAIL=admin@production.com
       - PGADMIN_DEFAULT_PASSWORD=ProductionPassword123!

@@ -5,13 +5,13 @@ resources:
 configMapGenerator:
   - name: app-config
     literals:
+      - POSTGRES_USER=staginguser
       - POSTGRES_DB=staging_db
       - REDIS_DB=0
 
 secretGenerator:
   - name: app-secret
     literals:
-      - POSTGRES_USER=staginguser
       - POSTGRES_PASSWORD=stagingpass
       - PGADMIN_DEFAULT_EMAIL=admin@staging.com
       - PGADMIN_DEFAULT_PASSWORD=StagingPassword123!
