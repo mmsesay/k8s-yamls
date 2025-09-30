@@ -9,7 +9,7 @@ data:
         {
           "id": "prod-redis",
           "name": "Redis - Production",
-          "host": "redis.production",
+          "host": "redis",
           "port": 6379,
           "db": 0,
           "description": "Production Redis Cache for Nexlura System"
