@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+  # UI Service
   ui:
     image: nexlura/gsim-ui:latest
     container_name: gsim-ui
@@ -10,14 +11,17 @@ services:
       - NEXT_PUBLIC_APP_URL=https://app.kyc-gsim.com
       - NEXT_PUBLIC_API_URL=https://api.kyc-gsim.com
       - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
     depends_on:
       - api
-    expose:
-      - "3000:3000"
+    ports:
+      - "3000:3000"   # keep host port mapping
     networks:
       - proxy
       - default
 
+  # API Service
   api:
     image: nexlura/gsim-api:latest
     container_name: gsim-api
@@ -33,20 +37,21 @@ services:
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=admin
       - DATABASE_NAME=gsim
-      - REDIS_HOST=69.30.235.206
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
-      - MINIO_HOST=69.30.235.206
+      - MINIO_HOST=minio
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_USE_SSL=true
       - MINIO_ENDPOINT_URL=https://media.kyc-gsim.com
     expose:
-      - "8081:8081"
+      - "8081"   # internal only
     networks:
       - proxy
       - default
 
+  # Postgres Database
   postgres:
     image: postgres:15
     container_name: postgres
@@ -62,6 +67,7 @@ services:
     networks:
       - default
 
+  # PgAdmin
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -75,6 +81,7 @@ services:
       - proxy
       - default
 
+  # Redis
   redis:
     image: redis:alpine
     container_name: redis
@@ -84,18 +91,20 @@ services:
     networks:
       - default
 
+  # RedisInsight
   redisinsight:
     image: redislabs/redisinsight:latest
     container_name: redisinsight
     restart: always
     expose:
-      - "5540:5540"
+      - "8001"
     depends_on:
       - redis
     networks:
       - proxy
       - default
 
+  # MinIO Storage
   minio:
     image: minio/minio
     container_name: minio
@@ -113,144 +122,7 @@ services:
       - proxy
       - default
 
-  # 🔥 Reverse Proxy + SSL
-  nginx-proxy-manager:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
-    restart: always
-    ports:
-      - "80:80"     # HTTP
-      - "443:443"   # HTTPS
-      - "81:81"     # Admin UI
-    volumes:
-      - npm_data:/data
-      - npm_letsencrypt:/etc/letsencrypt
-    networks:
-      - proxy
-
-volumes:
-  postgres_data:
-  minio_data:
-  npm_data:
-  npm_letsencrypt:
-
-nexlura@gsimapp:~/docker-container-ymls$ cat docker-compose.yml
-version: "3.9"
-
-services:
-  ui:
-    image: nexlura/gsim-ui:latest
-    container_name: gsim-ui
-    restart: always
-    environment:
-      - SESSION_SECRET=Pm/JwsD+oK39Ax88ixZs690Lf21Bq3hha5qAkFs+Zx0=
-      - NEXT_PUBLIC_APP_URL=https://app.kyc-gsim.com
-      - NEXT_PUBLIC_API_URL=https://api.kyc-gsim.com
-      - NODE_ENV=production
-    depends_on:
-      - api
-    expose:
-      - "3000"
-    networks:
-      - proxy
-      - default
-
-  api:
-    image: nexlura/gsim-api:latest
-    container_name: gsim-api
-    restart: always
-    depends_on:
-      - postgres
-      - redis
-      - minio
-    environment:
-      - ENVIRONMENT=PROD
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=admin
-      - DATABASE_NAME=gsim
-      - REDIS_HOST=69.30.235.206
-      - REDIS_PORT=6379
-      - REDIS_DB=0
-      - MINIO_HOST=69.30.235.206
-      - MINIO_ACCESS_KEY=minioadmin
-      - MINIO_SECRET_KEY=minioadmin
-      - MINIO_USE_SSL=true
-      - MINIO_ENDPOINT_URL=https://media.kyc-gsim.com
-    expose:
-      - "8081"
-    networks:
-      - proxy
-      - default
-
-  postgres:
-    image: postgres:15
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: gsim
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - default
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@gsim.com
-      PGADMIN_DEFAULT_PASSWORD: YWRtaW4=
-    expose:
-      - "80"
-    networks:
-      - proxy
-      - default
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    restart: always
-    ports:
-      - "6379:6379"
-    networks:
-      - default
-
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    container_name: redisinsight
-    restart: always
-    expose:
-      - "5540:5540"
-    depends_on:
-      - redis
-    networks:
-      - proxy
-      - default
-
-  minio:
-    image: minio/minio
-    container_name: minio
-    command: server /data --console-address ":9001"
-    restart: always
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - minio_data:/data
-    expose:
-      - "9000"
-      - "9001"
-    networks:
-      - proxy
-      - default
-
-  # 🔥 Reverse Proxy + SSL (Login (default: admin@example.com / changeme))
+  # Nginx Proxy Manager Reverse Proxy + SSL (Login (default: admin@example.com / changeme))
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:latest
     container_name: nginx-proxy-manager
